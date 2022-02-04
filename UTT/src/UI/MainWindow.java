@@ -8,7 +8,7 @@ public class MainWindow extends JFrame {
 	}
 	
 	private void initialize() {
-		this.setBounds(150,150,800,600);
+		this.setBounds(150,150,810,610);
 		this.setTitle("Universal Tester Teacher");
 	}
 

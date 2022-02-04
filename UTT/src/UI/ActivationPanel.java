@@ -5,12 +5,16 @@ import java.awt.Color;
 import javax.swing.JTextPane;
 import javax.swing.JLabel;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.SwingConstants;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 
 public class ActivationPanel extends JPanel {
-	private JTextField textField;
+	private JTextField key;
+	private JButton activateBtn;
 
 	/**
 	 * Create the panel.
@@ -35,16 +39,34 @@ public class ActivationPanel extends JPanel {
 		lblNewLabel.setBounds(44, 258, 223, 29);
 		add(lblNewLabel);
 		
-		textField = new JTextField();
-		textField.setBounds(263, 258, 429, 26);
-		add(textField);
-		textField.setColumns(10);
+		key = new JTextField();
+		key.setBounds(263, 258, 429, 26);
+		add(key);
+		key.setColumns(10);
 		
-		JButton activateBtn = new JButton("\u0410\u043A\u0442\u0438\u0432\u0438\u0440\u043E\u0432\u0430\u0442\u044C");
+	    activateBtn = new JButton("\u0410\u043A\u0442\u0438\u0432\u0438\u0440\u043E\u0432\u0430\u0442\u044C");
 		activateBtn.setBackground(new Color(109,141,143));
 		activateBtn.setFont(new Font("Times New Roman", Font.PLAIN, 18));
 		activateBtn.setBounds(318, 433, 171, 43);
+		activateBtn.setName("activateBtn");
 		add(activateBtn);
-
+		
 	}
+
+	public JButton getActivateBtn() {
+		return activateBtn;
+	}
+
+	public void setActivateBtn(JButton activateBtn) {
+		this.activateBtn = activateBtn;
+	}
+
+	public JTextField getKey() {
+		return key;
+	}
+
+	public void setKey(JTextField key) {
+		this.key = key;
+	}
+	
 }
