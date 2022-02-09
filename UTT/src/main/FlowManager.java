@@ -442,6 +442,7 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 									Integer.valueOf(setTest.getAmountOfQuestions().getText()));
 							inTest.addData(inTest.getPanel_3(), testTitle, questionNum);
 							inTest.getTestTitle().setText(testTitle);
+							finishTest.setName(setTest.getName());
 							
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
@@ -464,9 +465,12 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						window.add(nextPanel);
 						nextPanel.setVisible(true);	
 						try {
+							finishTest.setTestName(testTitle);
+							
 							finishTest.addResults(inTest.getQuestions(), Integer.valueOf(inTest.getQuestionAmount()),
 									inTest.getRgArray());
 							inTest.getQuestions().clear();
+							
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();

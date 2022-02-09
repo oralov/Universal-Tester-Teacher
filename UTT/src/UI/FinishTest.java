@@ -20,7 +20,9 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.awt.event.ActionEvent;
 import javax.swing.JScrollBar;
@@ -40,11 +42,17 @@ import java.awt.FlowLayout;
 import net.miginfocom.swing.MigLayout;
 
 public class FinishTest extends JPanel {
-	EditTest editTest = new EditTest();
 	JPanel panel_3;
 	private JButton exitToMenu;
 	ArrayList<Question> questions;
 	ArrayList<ButtonGroup> bgArray;
+	String name = "Без имени";
+	String testName = "";
+	int score = 0;
+	
+	Date currentDate = new Date();
+	  SimpleDateFormat dateFormat= new SimpleDateFormat("dd.MMMyyyy");
+	  String dateOnly = dateFormat.format(currentDate);
 
 	/**
 	 * Create the panel.
@@ -54,7 +62,7 @@ public class FinishTest extends JPanel {
 		setLayout(null);
 		
 		JLabel lblNewLabel = new JLabel("Результаты теста");
-		lblNewLabel.setBounds(330, 32, 195, 33);
+		lblNewLabel.setBounds(311, 28, 195, 33);
 		lblNewLabel.setFont(new Font("Times New Roman", Font.PLAIN, 25));
 		add(lblNewLabel);
 		
@@ -98,9 +106,33 @@ public class FinishTest extends JPanel {
 		this.panel_3 = panel_3;
 	}
 	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getTestName() {
+		return testName;
+	}
+
+	public void setTestName(String testName) {
+		this.testName = testName;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+	
 	
 	public void addResults( ArrayList<Question> questions, int amount, ArrayList<ButtonGroup> bGrp) throws SQLException {
-		
+		score = amount;
 		panel_3.removeAll();
 		this.questions = new ArrayList<Question>();
 		this.bgArray = new ArrayList<ButtonGroup>();
@@ -112,9 +144,15 @@ public class FinishTest extends JPanel {
 		JPanel container;	
 		JLabel text;
 		JRadioButton rb;
+		JLabel grade = new JLabel();
+		JLabel testTitle = new JLabel(testName);
+		testTitle.setFont(new Font("Times New Roman", Font.PLAIN, 18));
 		
-		
-		
+		panel_3.add(testTitle, "center");
+		panel_3.add(new JLabel(dateOnly));
+		panel_3.add(new JLabel(name));
+		panel_3.add(grade);
+		panel_3.add(new JLabel(""));
 		for(int i = 0; i <= amount -1; i++) {
 			container = new JPanel();
 			container.setBackground(new Color(193, 216, 219));
@@ -156,6 +194,7 @@ public class FinishTest extends JPanel {
 			  
 			}
 			  else {
+				  score--;
 				  ImageIcon icon = new ImageIcon("cross.png");
 				  Image img = getScaledImage(icon.getImage(), 20, 20);
 				  icon = new ImageIcon(img);
@@ -163,6 +202,7 @@ public class FinishTest extends JPanel {
 				  lbl.setPreferredSize(new Dimension(10,10));
 				  button.setForeground(Color.red);
 				  button.getParent().add(lbl, "gapleft 30" );
+				 
 
 			  }
 			  
@@ -176,7 +216,7 @@ public class FinishTest extends JPanel {
 		
 		
 		
-		
+	grade.setText("Процент выполнения теста: " + String.valueOf(calcGrade(score, amount)) + "/100");	
 	this.bgArray.clear();
 	this.questions.clear();
 	}
@@ -204,6 +244,13 @@ public class FinishTest extends JPanel {
 	    g2.dispose();
 
 	    return resizedImg;
+	}
+	
+	public int calcGrade(int score, int amount) {
+		 int grade = score * 100/amount;
+		
+		
+		return grade;
 	}
 
 	

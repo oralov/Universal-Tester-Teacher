@@ -99,6 +99,18 @@ public class SetTest extends JPanel {
 	
 	
 	
+	public String getName() {
+		return name.getText();
+	}
+
+
+
+	public void setName(JTextField name) {
+		this.name = name;
+	}
+
+
+
 	public JTextField getTime() {
 		return time;
 	}
