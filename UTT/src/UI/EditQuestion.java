@@ -7,11 +7,24 @@ import javax.swing.JButton;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+
 import javax.swing.JTextField;
+
+import Database.DBManager;
+
 import javax.swing.JCheckBox;
 
 public class EditQuestion extends JPanel {
 	private JTextField question;
+	String questionText;
+	String answerText1;
+	String answerText2;
+	String answerText3;
+	String answerText4;
+	String answerText5;
 	private JTextField answer1;
 	private JTextField answer2;
 	private JTextField asnwer3;
@@ -19,7 +32,7 @@ public class EditQuestion extends JPanel {
 	private JTextField answer5;
 	JButton saveTest;
 	JButton backBtn;
-
+    DBManager dbManager;
 
 	/**
 	 * Create the panel.
@@ -133,7 +146,41 @@ public class EditQuestion extends JPanel {
 		saveTest.setFont(new Font("Times New Roman", Font.PLAIN, 20));
 		saveTest.setBackground(new Color(109, 141, 143));
 		saveTest.setBounds(292, 520, 231, 40);
+		
+		
+		saveTest.addActionListener(new ActionListener() {
+
+		    @Override
+		    public void actionPerformed(ActionEvent e) {
+		      dbManager = new DBManager();
+		      dbManager.setConnection();
+		      try {
+				dbManager.executeUpdate("UPDATE questions SET question ='" + question.getText() + "' WHERE question='" + questionText + "'" );
+				dbManager.executeUpdate("UPDATE correctAnswers SET answer = '" + answer1.getText() + "' WHERE answer = '" + answerText1 + "'");
+				dbManager.executeUpdate("UPDATE correctAnswers SET answer = '" + answer2.getText() + "' WHERE answer = '" + answerText2 + "'");
+				dbManager.executeUpdate("UPDATE correctAnswers SET answer = '" + asnwer3.getText() + "' WHERE answer = '" + answerText3 + "'");
+				dbManager.executeUpdate("UPDATE correctAnswers SET answer = '" + answer4.getText() + "' WHERE answer = '" + answerText4 + "'");
+				dbManager.executeUpdate("UPDATE wrongAnswers SET answer = '" + answer5.getText() + "' WHERE answer = '" + answerText5 + "'");
+
+				dbManager.closeConnection();
+		      } catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		    
+		    }
+		});
+		
+		
 		add(saveTest);
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		backBtn = new JButton("");
 		backBtn.setIcon(new ImageIcon("C:\\Users\\oralo\\eclipse-workspace\\UTT\\src\\icons\\arrow.png"));
@@ -160,9 +207,99 @@ public class EditQuestion extends JPanel {
 		this.backBtn = backBtn;
 	}
 	
-	
-	
-	
+	public JTextField getQuestion() {
+		return question;
+	}
+
+	public void setQuestion(JTextField question) {
+		this.question = question;
+	}
+
+	public JTextField getAnswer1() {
+		return answer1;
+	}
+
+	public void setAnswer1(JTextField answer1) {
+		this.answer1 = answer1;
+	}
+
+	public JTextField getAnswer2() {
+		return answer2;
+	}
+
+	public void setAnswer2(JTextField answer2) {
+		this.answer2 = answer2;
+	}
+
+	public JTextField getAsnwer3() {
+		return asnwer3;
+	}
+
+	public void setAsnwer3(JTextField asnwer3) {
+		this.asnwer3 = asnwer3;
+	}
+
+	public JTextField getAnswer4() {
+		return answer4;
+	}
+
+	public void setAnswer4(JTextField answer4) {
+		this.answer4 = answer4;
+	}
+
+	public JTextField getAnswer5() {
+		return answer5;
+	}
+
+	public void setAnswer5(JTextField answer5) {
+		this.answer5 = answer5;
+	}
+	public String getQuestionText() {
+		return questionText;
+	}
+
+	public void setQuestionText(String questionText) {
+		this.questionText = questionText;
+	}
+	public String getAnswerText1() {
+		return answerText1;
+	}
+
+	public void setAnswerText1(String answerText1) {
+		this.answerText1 = answerText1;
+	}
+
+	public String getAnswerText2() {
+		return answerText2;
+	}
+
+	public void setAnswerText2(String answerText2) {
+		this.answerText2 = answerText2;
+	}
+
+	public String getAnswerText3() {
+		return answerText3;
+	}
+
+	public void setAnswerText3(String answerText3) {
+		this.answerText3 = answerText3;
+	}
+
+	public String getAnswerText4() {
+		return answerText4;
+	}
+
+	public void setAnswerText4(String answerText4) {
+		this.answerText4 = answerText4;
+	}
+
+	public String getAnswerText5() {
+		return answerText5;
+	}
+
+	public void setAnswerText5(String answerText5) {
+		this.answerText5 = answerText5;
+	}
 	
 	
 }

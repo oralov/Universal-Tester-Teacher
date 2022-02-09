@@ -40,7 +40,7 @@ public class SetTest extends JPanel {
 		setLayout(null);
 		
 		testLabel = new JLabel();
-		testLabel.setBounds(307, 40, 303, 24);
+		testLabel.setBounds(307, 40, 303, 34);
 		testLabel.setFont(new Font("Times New Roman", Font.PLAIN, 25));
 		add(testLabel);
 		
@@ -99,6 +99,18 @@ public class SetTest extends JPanel {
 	
 	
 	
+	public JTextField getTime() {
+		return time;
+	}
+
+
+
+	public void setTime(JTextField time) {
+		this.time = time;
+	}
+
+
+
 	public JButton getEditBtn() {
 		return editBtn;
 	}
@@ -132,5 +144,21 @@ public class SetTest extends JPanel {
 	public void setTestLabel(JLabel testLabel) {
 		this.testLabel = testLabel;
 	}
+	
+	public JTextField getAmountOfQuestions() {
+		return amountOfQuestions;
+	}
+
+	public void setAmountOfQuestions(JTextField amountOfQuestions) {
+		this.amountOfQuestions = amountOfQuestions;
+	}
+	
+	public void clear() {
+		name.setText("");
+		time.setText("");
+		amountOfQuestions.setText("");
+	}
+
+	
 	
 }

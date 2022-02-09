@@ -55,6 +55,7 @@ public class FlowManager {
 	public int questionNum = 0;
 	public int deleteBtnId = 0;
 	String testTitle;
+	String questionTitle;
 	boolean flag = true;
 	
 	Test test = new Test();
@@ -80,7 +81,7 @@ public void run() {
 		listener(createNewTest.getNextBtn(), createNewTest, addQuestions);
 		listener(addQuestions.getSaveTest(), addQuestions, createTest);
 		listener(editTest.getBackBtn(), editTest, createTest);	
-		listener(editQuestion.getSaveTest(), editQuestion, editTest);
+		
 		listener(editQuestion.getBackBtn(), editQuestion, editTest);
 		listener(menu.getTest(), menu, testing);
 		listener(testing.getBackBtn(), testing, menu);
@@ -150,9 +151,11 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 
 		    @Override
 		    public void actionPerformed(ActionEvent e) {
-		    	testTitle = title;
-		       System.out.println(testTitle);
+		       
+		      
 		       editTest.getPanel_3().removeAll();
+		       if(panelToAdd instanceof CreateTest) {
+		    	   testTitle = title;
 		       try {
 				addPanel(editTest.getPanel_3(), editTest);
 			} catch (SQLException e1) {
@@ -162,6 +165,22 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 		       createTest.setVisible(false);
 		       window.add(editTest);
 		       editTest.setVisible(true);
+		       
+		       }
+		       if(panelToAdd instanceof EditTest) {
+		    	   questionTitle = title;
+		    	   try {
+					populateQuestionFromDatabase(questionTitle);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		    	   System.out.println("CreateTest");
+		    	   editTest.setVisible(false);
+		    	   window.add(editQuestion);
+		    	   editQuestion.setVisible(true);
+		    	   
+		       }
 		    }
 		});
 		
@@ -189,7 +208,7 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 		    	  System.out.println(testTitle);
 		    	dbManager.executeUpdate("PRAGMA foreign_keys = ON");
 		    	dbManager.executeUpdate("DELETE FROM questions where question='" + testTitle +"'");
-		    		
+		    	
 		    	editTest.getPanel_3().remove(delete.getParent().getParent());;
 		    	editTest.validate();
 		    	editTest.repaint();	
@@ -265,12 +284,13 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 							
 							
 					}
-					else if(prevPanel instanceof CreateTest && nextPanel instanceof EditTest) {
-						
-						//editTest.getPanel_3().removeAll();
+					else if(prevPanel instanceof EditQuestion) {
+						System.out.println();
+					     editTest.getPanel_3().removeAll();
 						try {
 							dbManager.setConnection();
 							addPanel(editTest.getPanel_3(), editTest);
+							
 							
 							
 							prevPanel.setVisible(false); 
@@ -300,19 +320,32 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 							e1.printStackTrace();
 						}
 						
+					
+					}
+					
+					else if(prevPanel instanceof CreateTest && nextPanel instanceof CreateNewTest) {
+						questions = new ArrayList<Question>();
+						
+						prevPanel.setVisible(false); 
+						window.add(nextPanel);
+						nextPanel.setVisible(true);	
+					
 						
 						
 					}
+					
 					else if(prevPanel instanceof CreateNewTest && nextPanel instanceof AddQuestions) {
-						questions = new ArrayList<Question>();
-						questionNum = 0;
+						
+						
 						test.setTestName(createNewTest.getTestName().getText());
 						
 							prevPanel.setVisible(false); 
 							window.add(nextPanel);
 							nextPanel.setVisible(true);	
+						if(!flag) {
+							questionNum = 1;
+						}
 						
-						System.out.println(test.getTestName());
 					}
 					
 					
@@ -333,27 +366,30 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						clearFields();
 						questionNum++;
 						
+						
 						}
 						else {
 						clearFields();	
 						flag = true;
+						
+						
 						}
-						
 					}
-					else
-					{	
+					else {
+						populateFields(questionNum);
 						questionNum++;
-						populateFields(questionNum);	
-					}	
-					 }
-					/*
-					else if(questionNum >= 1 && nextPanel instanceof CreateNewTest) {
 						
-						flag = false;
-						populateFields(questionNum -1);
-						questionNum--;	
+						
+						
 					}
-					*/
+					 }
+					
+					else if(questionNum >= 1 && nextPanel instanceof CreateNewTest) {
+						flag = false;
+						questionNum--;
+						populateFields(questionNum);
+					}
+					
 					else if(prevPanel instanceof AddQuestions && nextPanel instanceof CreateTest) {
 						
 						createTest.getPanel_3().removeAll();
@@ -400,6 +436,10 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						setTest.setVisible(false);
 						window.add(inTest);
 						try {
+							
+							inTest.setQuestionAmount(Integer.valueOf(setTest.getAmountOfQuestions().getText()));
+							inTest.timer(inTest.getTimer(), Integer.valueOf(setTest.getTime().getText()) * 
+									Integer.valueOf(setTest.getAmountOfQuestions().getText()));
 							inTest.addData(inTest.getPanel_3(), testTitle, questionNum);
 							inTest.getTestTitle().setText(testTitle);
 							
@@ -407,7 +447,9 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
+						setTest.clear();
 						inTest.setVisible(true);
+						
 						
 				      
 					}
@@ -416,12 +458,28 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						window.add(nextPanel);
 						nextPanel.setVisible(true);	
 					}
+					else if(prevPanel instanceof InTest && nextPanel instanceof FinishTest ) {
+						
+						prevPanel.setVisible(false); 
+						window.add(nextPanel);
+						nextPanel.setVisible(true);	
+						try {
+							finishTest.addResults(inTest.getQuestions(), Integer.valueOf(inTest.getQuestionAmount()),
+									inTest.getRgArray());
+							inTest.getQuestions().clear();
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						//inTest.printRadio();
+					}
 					
 					
 					else {
 							prevPanel.setVisible(false); 
 							window.add(nextPanel);
 							nextPanel.setVisible(true);	
+							System.out.println("else");
 							
 							
 					}
@@ -450,6 +508,42 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 	addQuestions.getAnswer4().setText(questions.get(questionNumber).getCorrectAnswer().get(3));
 	addQuestions.getAnswer5().setText(questions.get(questionNumber).getWrongAnswers().get(0));
 	
+	}
+	
+	public void populateQuestionFromDatabase(String question) throws SQLException {
+		dbManager.setConnection();
+		String questionName = "";
+		
+		ArrayList<String> answers = new ArrayList<String>();
+		ResultSet rs = dbManager.executeQuery("SELECT * from questions where question = '" + question + "'");
+		int id = rs.getInt("id");
+		while(rs.next()) {
+			questionName = rs.getString("question");
+			editQuestion.setQuestionText(questionName);
+		}
+		rs = dbManager.executeQuery("Select * from correctAnswers where fk_id =" + id );
+		while(rs.next()) {
+			answers.add(rs.getString("answer"));
+			
+		}
+		rs = dbManager.executeQuery("Select * from wrongAnswers where fk_id =" + id );
+		while(rs.next()) {
+			answers.add(rs.getString("answer"));
+		}
+		
+		editQuestion.setAnswerText1(answers.get(0));
+		editQuestion.setAnswerText2(answers.get(1));
+		editQuestion.setAnswerText3(answers.get(2));
+		editQuestion.setAnswerText4(answers.get(3));
+		editQuestion.setAnswerText5(answers.get(4));
+		
+		editQuestion.getQuestion().setText(questionName);
+		editQuestion.getAnswer1().setText(answers.get(0));
+		editQuestion.getAnswer2().setText(answers.get(1));
+		editQuestion.getAsnwer3().setText(answers.get(2));
+		editQuestion.getAnswer4().setText(answers.get(3));
+		editQuestion.getAnswer5().setText(answers.get(4));
+		dbManager.closeConnection();
 	}
 	
 	public void retrieveData(String query, String field, JPanel panelToAdd, JPanel panel) throws SQLException {

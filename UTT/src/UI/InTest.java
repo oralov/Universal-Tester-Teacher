@@ -5,19 +5,28 @@ import javax.swing.JRadioButton;
 import javax.swing.JLabel;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagLayout;
 import java.awt.ScrollPane;
 
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.awt.event.ActionEvent;
 import javax.swing.JScrollBar;
 import javax.swing.JTextArea;
@@ -25,6 +34,9 @@ import javax.swing.JList;
 import java.awt.GridLayout;
 import javax.swing.ScrollPaneConstants;
 
+
+import Beans.CountDown;
+import Beans.Question;
 import Database.DBManager;
 import main.FlowManager;
 
@@ -33,17 +45,23 @@ import net.miginfocom.swing.MigLayout;
 
 public class InTest extends JPanel {
 	String testName = "";
-	
+	private int questionAmount = 0;
 	EditTest editTest = new EditTest();
 	JPanel panel_3;
-	private JLabel lblNewLabel_1;
+	private JLabel timer;
 	private JLabel testTitle;
 	private JButton exitTest;
 	DBManager dbManager = new DBManager();
 	ResultSet  rs;
+	ButtonGroup rg;
+	JRadioButton answers;
+	ArrayList<ButtonGroup> rgArray = new ArrayList<ButtonGroup>();
+	Question q;
+	ArrayList<Question> questions = new ArrayList<Question>();
+	SetTest setTest = new SetTest();
+	FinishTest finishTest;
 	
 	
-
 	/**
 	 * Create the panel.
 	 * 
@@ -54,7 +72,7 @@ public class InTest extends JPanel {
 		setLayout(null);
 		
 		testTitle = new JLabel("Тест о лошади Чингиз хана");
-		testTitle.setBounds(260, 40, 334, 24);
+		testTitle.setBounds(260, 40, 334, 27);
 		testTitle.setFont(new Font("Times New Roman", Font.PLAIN, 25));
 		add(testTitle);
 		
@@ -69,10 +87,13 @@ public class InTest extends JPanel {
 		scrollPane.setViewportView(panel_3);
 		panel_3.setLayout(new MigLayout("left center, wrap, gapy 5"));
 		
-		lblNewLabel_1 = new JLabel("Времени осталось на тест: 40:00:00");
-		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		lblNewLabel_1.setBounds(10, 10, 267, 23);
-		add(lblNewLabel_1);
+	    
+		timer = new JLabel("");
+		timer.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		timer.setBounds(10, 10, 267, 23);
+		
+		add(timer);
+		
 		
 		exitTest = new JButton("Выход\r\n");
 		exitTest.setFont(new Font("Times New Roman", Font.PLAIN, 15));
@@ -81,13 +102,19 @@ public class InTest extends JPanel {
 		add(exitTest);
 		
 		
-		
-		
-		
-
 	}
 	
 	
+	public JLabel getTimer() {
+		return timer;
+	}
+
+
+	public void setTimer(JLabel timer) {
+		this.timer = timer;
+	}
+
+
 	public JButton getExitTest() {
 		return exitTest;
 	}
@@ -115,58 +142,160 @@ public class InTest extends JPanel {
 		this.testTitle = testTitle;
 	}
 	
+	public int getQuestionAmount() {
+		return questionAmount;
+	}
+
+
+	public void setQuestionAmount(int questionAmount) {
+		this.questionAmount = questionAmount;
+	}
+	
+	public ArrayList<Question> getQuestions() {
+		return questions;
+	}
+
+
+	public void setQuestions(ArrayList<Question> questions) {
+		this.questions = questions;
+	}
+	
+	public ArrayList<ButtonGroup> getRgArray() {
+		return rgArray;
+	}
+
+
+	public void setRgArray(ArrayList<ButtonGroup> rgArray) {
+		this.rgArray = rgArray;
+	}
 	
 	
 	
-	public void addData(JPanel panel, String test, int questionAmount) throws SQLException {
+	
+	public void addData(JPanel panel, String test, int questionsAmount) throws SQLException {
+		
 		dbManager.setConnection();
 		String query = "SELECT * FROM questions where fk_id = (select id from Test where name ='" + test + "')";
 		rs = dbManager.executeQuery(query);
 		int id;
 		while(rs.next()) {
-		JPanel qPanel = new JPanel();
-		qPanel.setBackground(new Color(193, 216, 219));
-		qPanel.setLayout(new MigLayout("left center, wrap, gapy 5"));
-		qPanel.setPreferredSize(new Dimension(760, 170));
-		JLabel question = new JLabel(rs.getString("question"));
-		id = rs.getInt("id");
-		question.setBounds(0 , 2 , 760, 25);
-		qPanel.add(question);
 		
-		addRadioButtons(qPanel, id);
+			questions.add(new Question(rs.getInt("id") ,rs.getString("question")));
+			
 		
-		panel.add(qPanel);
 		
 		}	
+		
+		Collections.shuffle(questions);
+		for(int i = 0; i <= questionAmount -1 ; i++) {
+			
+			JPanel qPanel = new JPanel();
+			qPanel.setBackground(new Color(193, 216, 219));
+			qPanel.setLayout(new MigLayout("left center, wrap, gapy 5"));
+			qPanel.setPreferredSize(new Dimension(760, 170));
+			JLabel question = new JLabel(questions.get(i).getQuestionName());
+			question.setFont(new Font(Font.SERIF, Font.PLAIN, 16 ));
+			id = questions.get(i).getId();
+			question.setBounds(0 , 2 , 760, 25);
+			qPanel.add(question);
+			
+			addRadioButtons(qPanel, id);
+			
+			panel.add(qPanel);
+			
+		}
+		
+		
 		dbManager.closeConnection();
 		System.out.println("Connetion is closed");
 		
 	}
 
 	public void addRadioButtons(JPanel panel, int id) throws SQLException {
-		ButtonGroup rg = new ButtonGroup();
+		rg = new ButtonGroup();
 		ResultSet resultSet = dbManager.executeQuery("SELECT * FROM correctAnswers");
 		
 		while(resultSet.next()) {
 			if(resultSet.getInt("fk_id") == id) {
-		System.out.println(resultSet.getString("answer"));
+		//System.out.println(resultSet.getString("answer"));
 			
 		
-		JRadioButton answers = new JRadioButton(resultSet.getString("answer"));
+		answers = new JRadioButton(resultSet.getString("answer"));
 		answers.setBackground(new Color(193, 216, 219));
+		answers.setFont(new Font(Font.SERIF, Font.PLAIN, 15 ));
 		answers.setBounds(0, 20, 50, 30);
 		rg.add(answers);
-		panel.add(answers);
 		
+		panel.add(answers);
+			}
+			
+		
+		
+			
+		}
+		
+		resultSet = dbManager.executeQuery("SELECT * FROM wrongAnswers");
+		
+		while(resultSet.next()) {
+			if(resultSet.getInt("fk_id") == id) {
+		
+			
+		
+		answers = new JRadioButton(resultSet.getString("answer"));
+		answers.setBackground(new Color(193, 216, 219));
+		answers.setFont(new Font(Font.SERIF, Font.PLAIN, 15 ));
+		answers.setBounds(0, 20, 50, 30);
+		rg.add(answers);
+		
+		panel.add(answers);
 			}
 		}
 		
+		
+		rgArray.add(rg);
 		}
 
+		public void printRadio () {
+			for(ButtonGroup bg : rgArray){
+			System.out.println(getSelectedButtonText(bg));
+			  
+			}
+			
+		}
 		
 		
+		
+		public String getSelectedButtonText(ButtonGroup buttonGroup) {
+	        for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+	            AbstractButton button = buttons.nextElement();
+
+	            if (button.isSelected()) {
+	                return button.getText();
+	            }
+	        }
+
+	        return null;
+	    }
+		
+		
+		public static void timer(JLabel label, int time) {
+			long setTime = time * 60000;
+			
+			Timer timer = new Timer();
+			int millis = 1000; //n*1000 millisecond = n second --> n minutes = n*60*1000   
+			timer.schedule(new TimerTask() {
+			  long time = setTime;
+			  public void run() {
+				  time = time - millis;
+				  String timeStamp = new SimpleDateFormat("mm:ss").format(new Timestamp(time));
+			  label.setText(timeStamp);
+			  }
+			}, millis, 1000);
+			
+		}
+		
 	
-	
+		
 	
 	
 }

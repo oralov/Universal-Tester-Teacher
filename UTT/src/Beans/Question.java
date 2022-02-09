@@ -13,6 +13,11 @@ public class Question {
 		
 	}
 	
+	public Question(int id, String text) {
+		this.id = id;
+		questionName = text;
+	}
+	
 	
 	
 	public String getQuestionName() {
