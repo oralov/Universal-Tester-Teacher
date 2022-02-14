@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -21,6 +22,7 @@ import UI.ActivationPanel;
 import UI.AddQuestions;
 import UI.CreateNewTest;
 import UI.CreateTest;
+import UI.DetailedResults;
 import UI.EditQuestion;
 import UI.EditTest;
 import UI.FinishTest;
@@ -46,7 +48,7 @@ public class FlowManager {
 	Results results = new Results();
 	ResultsSearch resultsSearch = new ResultsSearch();
 	CreateNewTest createNewTest = new CreateNewTest();
-	
+	DetailedResults detailedResults = new DetailedResults();
 	AddQuestions addQuestions = new AddQuestions();
 	EditTest editTest = new EditTest();
 	EditQuestion editQuestion = new EditQuestion();
@@ -356,11 +358,37 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						question = new Question();
 						question.setId(questionNum);
 						question.setQuestionName(addQuestions.getQuestion().getText());
+						
+						if(addQuestions.getA1().isSelected()) {
 						question.setCorrectAnswer(addQuestions.getAnswer1().getText());
-						question.setCorrectAnswer(addQuestions.getAnswer2().getText());
+						}
+						else {
+						question.setWrongAnswers(addQuestions.getAnswer1().getText());
+						}
+						if(addQuestions.getA2().isSelected()) {
+							question.setCorrectAnswer(addQuestions.getAnswer2().getText());
+						}
+						else {
+						question.setWrongAnswers(addQuestions.getAnswer2().getText());
+						}
+						if(addQuestions.getA3().isSelected()) {
 						question.setCorrectAnswer(addQuestions.getAsnwer3().getText());
+						}
+						else {
+						question.setWrongAnswers(addQuestions.getAsnwer3().getText());
+						}
+						if(addQuestions.getA4().isSelected()) {
 						question.setCorrectAnswer(addQuestions.getAnswer4().getText());
+						}
+						else {
+						question.setWrongAnswers(addQuestions.getAnswer4().getText());
+						}
+						if(addQuestions.getA5().isSelected()) {
+						question.setCorrectAnswer(addQuestions.getAnswer5().getText());
+						}
+						else {
 						question.setWrongAnswers(addQuestions.getAnswer5().getText());
+						}
 						
 						questions.add(question);
 						clearFields();
@@ -468,8 +496,8 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 							finishTest.setTestName(testTitle);
 							
 							finishTest.addResults(inTest.getQuestions(), Integer.valueOf(inTest.getQuestionAmount()),
-									inTest.getRgArray());
-							inTest.getQuestions().clear();
+									inTest.getRgArray(), inTest.getBoxArrayArray());
+							//inTest.getQuestions().clear();
 							
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
@@ -478,14 +506,44 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						//inTest.printRadio();
 					}
 					
+					else if(prevPanel instanceof FinishTest && nextPanel instanceof MainMenu) {
+						try {
+							dbManager.setConnection();
+							finishTest.saveResults(dbManager);
+							dbManager.closeConnection();
+						} catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						prevPanel.setVisible(false); 
+						window.add(nextPanel);
+						nextPanel.setVisible(true);	
+					}
+					else if(prevPanel instanceof ResultsSearch && nextPanel instanceof Results) {
+						prevPanel.setVisible(false); 
+						window.add(nextPanel);
+						nextPanel.setVisible(true);	
+						results.setName(resultsSearch.getNameOfUser().getText());
+						results.setTestTitle(resultsSearch.getNameOfTest().getText());
+						results.setDateFrom(resultsSearch.getFrom().getText());
+						results.setDateTo(resultsSearch.getTo().getText());
+						try {
+							results.addData(window, results, detailedResults);
+						} catch (SQLException e1 ) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						catch(ParseException p1) {
+							p1.printStackTrace();
+						}
+					}
+					
 					
 					else {
 							prevPanel.setVisible(false); 
 							window.add(nextPanel);
 							nextPanel.setVisible(true);	
-							System.out.println("else");
-							
-							
+								
 					}
 					
 			 } 
