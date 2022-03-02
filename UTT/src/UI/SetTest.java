@@ -30,8 +30,11 @@ public class SetTest extends JPanel {
     private JTextField time;
     JButton            startTest;
     JLabel             testLabel;
+    private JLabel error;
 
-    /**
+    
+
+	/**
      * Create the panel.
      */
     public SetTest() {
@@ -87,6 +90,12 @@ public class SetTest extends JPanel {
         startTest.setBackground(new Color(109, 141, 143));
         startTest.setBounds(307, 484, 193, 40);
         add(startTest);
+        
+        error = new JLabel("");
+        error.setBounds(67, 93, 576, 24);
+        error.setForeground(Color.red);
+        error.setFont(new Font("Times New Roman", Font.PLAIN, 15));
+        add(error);
     }
 
     public void clear() {
@@ -150,6 +159,14 @@ public class SetTest extends JPanel {
     public void setTime(JTextField time) {
         this.time = time;
     }
+    
+    public JLabel getError() {
+		return error;
+	}
+
+	public void setError(JLabel error) {
+		this.error = error;
+	}
 }
 
 

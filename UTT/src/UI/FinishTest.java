@@ -63,7 +63,7 @@ import net.miginfocom.swing.MigLayout;
 public class FinishTest extends JPanel {
     String                 name              = "Без имени";
     String                 testName          = "";
-    int                    score             = 0;
+    double                  score             = 0;
     int                    amountOfQuestions = 0;
     Date                   currentDate       = new Date();
     SimpleDateFormat       dateFormat        = new SimpleDateFormat("dd.MM.yyyy.hh.mm.ss");
@@ -74,8 +74,11 @@ public class FinishTest extends JPanel {
     ArrayList<ButtonGroup> bgArray;
     ArrayList<ArrayList> boxArrayArray;
     DBManager              dbManager;
-    int                    grade;
+    double                   grade;
     String                 date;
+    int ticks = 0;
+    int crosses = 0;
+    boolean flag = false;
 
     /**
      * Create the panel.
@@ -100,23 +103,23 @@ public class FinishTest extends JPanel {
         panel_3.setBackground(new Color(193, 216, 219));
         scrollPane.setViewportView(panel_3);
         panel_3.setLayout(new MigLayout("left center, wrap, gapy 5"));
-        exitToMenu = new JButton("Выход\r\n");
+        exitToMenu = new JButton("Сохранить и выйти");
         exitToMenu.setFont(new Font("Times New Roman", Font.PLAIN, 15));
         exitToMenu.setBackground(new Color(109, 141, 143));
         exitToMenu.setBounds(10, 31, 137, 33);
-        add(exitToMenu);
+        
     }
 
     public void addResults(ArrayList<Question> questions, int amount, ArrayList<ButtonGroup> bGrp, ArrayList<ArrayList> chkbx) throws SQLException {
         amountOfQuestions = amount;
         dbManager         = new DBManager();
         this.dbManager.setConnection();
-        score = amount;
+        score = 0;
         panel_3.removeAll();
         this.questions = new ArrayList<Question>();
         this.bgArray   = new ArrayList<ButtonGroup>();
         this.boxArrayArray = new ArrayList<ArrayList>();
-
+        ArrayList<JCheckBox> boxes;
         ResultSet rs;
 
         this.questions = questions;
@@ -136,6 +139,8 @@ public class FinishTest extends JPanel {
         panel_3.add(new JLabel(name));
         panel_3.add(grade);
         panel_3.add(new JLabel(""));
+        
+        int counter = 0;
 
         for (int i = 0; i <= amount - 1; i++) {
             container = new JPanel();
@@ -151,121 +156,159 @@ public class FinishTest extends JPanel {
            int correctAnswers =  amountOfAnswers(this.questions.get(i).getQuestionName());
            
            if(correctAnswers <=1) {
-            for (Enumeration<AbstractButton> buttons = bgArray.get(i).getElements(); buttons.hasMoreElements(); ) {
-                AbstractButton button = buttons.nextElement();
-                JPanel         cont   = new JPanel();
+               for (Enumeration<AbstractButton> buttons = bgArray.get(i).getElements(); buttons.hasMoreElements(); ) {
+                   AbstractButton button = buttons.nextElement();
+                   JPanel         cont   = new JPanel();
 
-                cont.setLayout(new MigLayout());
-                cont.setBackground(new Color(193, 216, 219));
-                button.setBackground(new Color(193, 216, 219));
-                cont.add(button);
-                questionPanel.add(cont);
+                   cont.setLayout(new MigLayout());
+                   cont.setBackground(new Color(193, 216, 219));
+                   button.setBackground(new Color(193, 216, 219));
+                   cont.add(button);
+                   questionPanel.add(cont);
 
-                if (button.isSelected()) {
-                    rs = dbManager.executeQuery(
-                        "SELECT * FROM correctAnswers where fk_id = (SELECT id from questions where question = '"
-                        + this.questions.get(i).getQuestionName() + "')");
+                   if (button.isSelected()) {
+                       rs = dbManager.executeQuery(
+                           "SELECT * FROM correctAnswers where fk_id = (SELECT id from questions where question = '"
+                           + this.questions.get(i).getQuestionName() + "')");
 
-                    JLabel lbl = new JLabel("");
+                       JLabel lbl = new JLabel("");
 
-                    if (button.getText().equals(rs.getString("answer"))) {
-                        ImageIcon icon = new ImageIcon("tick.png");
-                        Image     img  = getScaledImage(icon.getImage(), 20, 20);
+                       if (button.getText().equals(rs.getString("answer"))) {
+                           ImageIcon icon = new ImageIcon("tick.png");
+                           Image     img  = getScaledImage(icon.getImage(), 20, 20);
 
-                        icon = new ImageIcon(img);
-                        lbl.setIcon(icon);
-                        lbl.setPreferredSize(new Dimension(10, 10));
-                        button.setForeground(Color.blue);
-                        button.getParent().add(lbl, "gapleft 30");
-                    } else {
-                        score--;
+                           icon = new ImageIcon(img);
+                           lbl.setIcon(icon);
+                           lbl.setPreferredSize(new Dimension(10, 10));
+                           button.setForeground(Color.blue);
+                           button.getParent().add(lbl, "gapleft 30");
+                           score++;
+                       } else if(!button.getText().equals(rs.getString("answer"))) {
+                           
 
-                        ImageIcon icon = new ImageIcon("cross.png");
-                        Image     img  = getScaledImage(icon.getImage(), 20, 20);
+                           ImageIcon icon = new ImageIcon("cross.png");
+                           Image     img  = getScaledImage(icon.getImage(), 20, 20);
 
-                        icon = new ImageIcon(img);
-                        lbl.setIcon(icon);
-                        lbl.setPreferredSize(new Dimension(10, 10));
-                        button.setForeground(Color.red);
-                        button.getParent().add(lbl, "gapleft 30");
-                    }
-                }
-
-                panel_3.add(questionPanel);
-            }
-           }
+                           icon = new ImageIcon(img);
+                           lbl.setIcon(icon);
+                           lbl.setPreferredSize(new Dimension(10, 10));
+                           button.setForeground(Color.red);
+                           button.getParent().add(lbl, "gapleft 30");
+                       }
+                   }
+                   
+                   
+                   panel_3.add(questionPanel);
+               }
+               int selected = numberOfSelected(bgArray.get(i));
+               
+               if(selected == 0) {
+            	  
+               }
+              }
+              
            
            
-           
-           if(correctAnswers > 1) {
-        	   for(ArrayList<JCheckBox> a : chkbx) {
-        		   for(JCheckBox c : a) {
-        			   
-        			   JPanel         cont   = new JPanel();
+            if(correctAnswers > 1) {
+        	   
+        	  boxes = this.boxArrayArray.get(counter);
+        	   System.out.println(boxes.size());
+        	   int amountSelected = 0;
+        		   for(int j = 0; j <= boxes.size() -1 ; j++) {
+        			   JPanel         cont   = new JPanel();	   
 
                        cont.setLayout(new MigLayout());
                        cont.setBackground(new Color(193, 216, 219));
-                       c.setBackground(new Color(193, 216, 219));
-                       cont.add(c);
-                       questionPanel.add(cont);
-        			   
-        			   
-        			   if(c.isSelected()) {
-        				   
+                     
+                       cont.add(boxes.get(j));
+                       
+                       
+                       questionPanel.add(cont); 
+                       
+                       
+                         if(boxes.get(j).isSelected()) {
+        				   amountSelected++;
         				   rs = dbManager.executeQuery(
         	                        "SELECT * FROM correctAnswers where fk_id = (SELECT id from questions where question = '"
         	                        + this.questions.get(i).getQuestionName() + "')");
         				   
         				   JLabel lbl = new JLabel("");
         				   while(rs.next()) {
-        					   System.out.println(rs.getString("answer"));
-        				   if (c.getText().equals(rs.getString("answer"))) {
+        					   
+        				   if (boxes.get(j).getText().equals(rs.getString("answer"))) {
+        					   
                                ImageIcon icon = new ImageIcon("tick.png");
                                Image     img  = getScaledImage(icon.getImage(), 20, 20);
 
                                icon = new ImageIcon(img);
                                lbl.setIcon(icon);
                                lbl.setPreferredSize(new Dimension(10, 10));
-                               c.setForeground(Color.blue);
-                               c.getParent().add(lbl, "gapleft 30");
+                               boxes.get(j).setForeground(Color.blue);
+                               boxes.get(j).getParent().add(lbl, "gapleft 30");
+                               ticks++;
+                               flag = true;
                            }
         				   
-        				   }
         				   
-        				   while(rs.next()) {
-        					   System.out.println(rs.getString("answer"));
-        				   if (c.getText().equals(rs.getString("answer"))) {
-                               ImageIcon icon = new ImageIcon("tick.png");
+        				   
+        					   
+        				   else if (!flag && !(boxes.get(j).getText().equals(rs.getString("answer")))) {
+        					   
+                               ImageIcon icon = new ImageIcon("cross.png");
                                Image     img  = getScaledImage(icon.getImage(), 20, 20);
 
                                icon = new ImageIcon(img);
                                lbl.setIcon(icon);
                                lbl.setPreferredSize(new Dimension(10, 10));
-                               c.setForeground(Color.blue);
-                               c.getParent().add(lbl, "gapleft 30");
+                               boxes.get(j).setForeground(Color.red);
+                               boxes.get(j).getParent().add(lbl, "gapleft 30");
+                               crosses ++;
+                               if(j != 1) {
+                               
+                               }
+                              
                            }
+        				   
         				   
         				   }
         				   
         				   
         			   }
-        			  
-        			   
-        		   }
+                         
         		   
-        	   }
-        	   panel_3.add(questionPanel);
+                         flag = false;    
+        		   }
+        		    if(amountSelected == 0) {
+                  	 
+                   }
+        		  
+        		 counter++;    
+        		 panel_3.add(questionPanel);    
+        	   
+        	   
            }
            
            
            
+           
         }
-
-        grade.setText("Процент выполнения теста: " + String.valueOf(calcGrade(score, amount)) + "/100");
+        
+        System.out.println("ticks: " + ticks);
+        crosses = crosses/2;
+        System.out.println(score);
+        if(ticks != 0) {
+        score = score + (ticks * 0.5) ;
+        }
+        else {
+        	score = score + (ticks * 0.5);
+        }
+        grade.setText("Процент выполнения теста: " + String.valueOf((int)(calcGrade(score, amount)) + "/100"));
         this.dbManager.closeConnection();
+        panel_3.add(exitToMenu, "gapleft 350");
+        
     }
 
-    public int calcGrade(int score, int amount) {
+    public double calcGrade(double score, int amount) {
         grade = score * 100 / amount;
 
         return grade;
@@ -413,7 +456,10 @@ public class FinishTest extends JPanel {
 
         // dbManager.executeUpdate("UPDATE results set image = " + "'" + readFile("save1.jpeg") + "'" + " where date = '" + dateOnly + "'");
         this.bgArray.clear();
-        this.questions.clear();
+        this.boxArrayArray.clear();
+        score = 0;
+        ticks =0;
+        crosses = 0;
     }
 
     public JButton getExitTest() {
@@ -451,7 +497,7 @@ public class FinishTest extends JPanel {
         return resizedImg;
     }
 
-    public int getScore() {
+    public double getScore() {
         return score;
     }
 
@@ -463,14 +509,28 @@ public class FinishTest extends JPanel {
         for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements(); ) {
             AbstractButton button = buttons.nextElement();
 
-            if (!button.isSelected()) {
+            if (button.isSelected()) {
                 return button.getText();
             }
         }
 
         return null;
     }
+    
+    public int numberOfSelected(ButtonGroup bGrp) {
+    	int num = 0;
+    	  for (Enumeration<AbstractButton> buttons = bGrp.getElements(); buttons.hasMoreElements(); ) {
+              AbstractButton button = buttons.nextElement();
 
+              if (button.isSelected()) {
+                  num++;
+              }
+          }
+
+          return num;
+    }
+    
+    
     public String getTestName() {
         return testName;
     }
@@ -485,6 +545,10 @@ public class FinishTest extends JPanel {
     	count = rs.getInt("count");
     	return count;
     }
+    
+    
+    
+    
 }
 
 

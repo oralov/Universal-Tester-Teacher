@@ -67,14 +67,15 @@ public class InTest extends JPanel {
     JCheckBox boxAnswers;
     Question               q;
     FinishTest             finishTest;
+    public static Timer timer1;
 
-    /**
+    
+
+	/**
      * Create the panel.
      *
      */
     public InTest() {
-
-        // dbManager.setConnection();
         setBackground(new Color(193, 216, 219));
         setLayout(null);
         testTitle = new JLabel("Тест о лошади Чингиз хана");
@@ -96,11 +97,12 @@ public class InTest extends JPanel {
         timer.setFont(new Font("Tahoma", Font.PLAIN, 12));
         timer.setBounds(10, 10, 267, 23);
         add(timer);
-        exitTest = new JButton("Выход\r\n");
+        exitTest = new JButton("Завершить Тест");
         exitTest.setFont(new Font("Times New Roman", Font.PLAIN, 15));
         exitTest.setBackground(new Color(109, 141, 143));
-        exitTest.setBounds(653, 5, 137, 33);
-        add(exitTest);
+        exitTest.setBounds(0,0,20,0);
+        
+        
     }
 
     public void addData(JPanel panel, String test, int questionsAmount) throws SQLException {
@@ -120,22 +122,31 @@ public class InTest extends JPanel {
 
         for (int i = 0; i <= questionAmount - 1; i++) {
             JPanel qPanel = new JPanel();
-
+            qPanel.setName(Integer.toString(i + 1));
             qPanel.setBackground(new Color(193, 216, 219));
             qPanel.setLayout(new MigLayout("left center, wrap, gapy 5"));
             qPanel.setPreferredSize(new Dimension(760, 170));
 
-            JLabel question = new JLabel(questions.get(i).getQuestionName());
+            JLabel question = new JLabel(i + 1 + ". " +questions.get(i).getQuestionName());
+            
 
             question.setFont(new Font(Font.SERIF, Font.PLAIN, 16));
             id = questions.get(i).getId();
             question.setBounds(0, 2, 760, 25);
             qPanel.add(question);
             addRadioButtons(qPanel, id);
+            
             panel.add(qPanel);
+            
+            
         }
+        
 
         dbManager.closeConnection();
+        panel.add(exitTest, "gapleft 350");
+       
+        
+        
     }
 
     public void addRadioButtons(JPanel panel, int id) throws SQLException {
@@ -145,72 +156,83 @@ public class InTest extends JPanel {
         int count = 0;
         ResultSet rs3 = dbManager.executeQuery("SELECT COUNT(*) AS count FROM correctAnswers where fk_id ='" + id + "'");
         ResultSet resultSet = dbManager.executeQuery("SELECT * FROM correctAnswers");
+        ResultSet wResultSet = dbManager.executeQuery("SELECT * FROM wrongAnswers");
+        ArrayList<String> shuffledAnswers = new ArrayList<String>();
         
-        
-        
-        while (resultSet.next()) {
+        while(resultSet.next()) {
         	if(rs3.getInt("count") <= 1) {
-            if (resultSet.getInt("fk_id") == id) {
-            	
-                // System.out.println(resultSet.getString("answer"));
-                answers = new JRadioButton(resultSet.getString("answer"));
+                if (resultSet.getInt("fk_id") == id) {
+                	shuffledAnswers.add(resultSet.getString("answer"));
+                }
+        	}
+        	if(rs3.getInt("count") > 1) {
+                if (resultSet.getInt("fk_id") == id) {
+                	shuffledAnswers.add(resultSet.getString("answer"));
+                }
+        	}
+        }
+        
+        while(wResultSet.next()) {
+        	if(rs3.getInt("count") <= 1) {
+                if (wResultSet.getInt("fk_id") == id) {
+                	shuffledAnswers.add(wResultSet.getString("answer"));
+                }
+        	}
+        	if(rs3.getInt("count") > 1) {
+                if (wResultSet.getInt("fk_id") == id) {
+                	shuffledAnswers.add(wResultSet.getString("answer"));
+                }
+        	}
+        }
+        
+        
+        
+        Collections.shuffle(shuffledAnswers);
+        
+        
+        
+        
+        
+         
+       for(String s : shuffledAnswers) {
+        	if(rs3.getInt("count") <= 1) {
+           
+            
+                answers = new JRadioButton(s);
                 answers.setBackground(new Color(193, 216, 219));
                 answers.setFont(new Font(Font.SERIF, Font.PLAIN, 15));
                 answers.setBounds(0, 20, 50, 30);
+                
+                
                 rg.add(answers);
                 panel.add(answers);
             }
-            }
+            
         	
         	if(rs3.getInt("count") > 1) {
-                if (resultSet.getInt("fk_id") == id) {
                 
-                	boxAnswers = new JCheckBox(resultSet.getString("answer"));
+                
+                	boxAnswers = new JCheckBox(s);
                 	boxAnswers.setBackground(new Color(193, 216, 219));
                     boxAnswers.setFont(new Font(Font.SERIF, Font.PLAIN, 15));
                     boxAnswers.setBounds(0, 20, 50, 30);
                     boxArray.add(boxAnswers);
                     panel.add(boxAnswers);
                 	
-                }
                 
-                }
-        }
-        resultSet = dbManager.executeQuery("SELECT * FROM wrongAnswers");
-
-        while (resultSet.next()) {
-        	if(rs3.getInt("count") <= 1) {
-            if (resultSet.getInt("fk_id") == id) {
-                answers = new JRadioButton(resultSet.getString("answer"));
-                answers.setBackground(new Color(193, 216, 219));
-                answers.setFont(new Font(Font.SERIF, Font.PLAIN, 15));
-                answers.setBounds(0, 20, 50, 30);
-                rg.add(answers);
-                panel.add(answers);
-            }
-        }
-        	
-        	if(rs3.getInt("count") > 1) {
-                if (resultSet.getInt("fk_id") == id) {
                 
-                	boxAnswers = new JCheckBox(resultSet.getString("answer"));
-                	boxAnswers.setBackground(new Color(193, 216, 219));
-                    boxAnswers.setFont(new Font(Font.SERIF, Font.PLAIN, 15));
-                    boxAnswers.setBounds(0, 20, 50, 30);
-                    boxArray.add(boxAnswers);
-                    panel.add(boxAnswers);
-                	
-                }
                 
-                }
-        	
         }
+       }
         
         
+        rgArray.add(rg);
+        if(!boxArray.isEmpty()) {
         boxArrayArray.add(boxArray);
-        rgArray.add(rg);	
-        	
+        } 	
         }
+        
+    
         
         
  
@@ -222,18 +244,23 @@ public class InTest extends JPanel {
     }
 
     public static void timer(JLabel label, int time) {
+    	timer1   = new Timer();
+    	label.setText("");
         long  setTime = time * 60000;
-        Timer timer   = new Timer();
+        
         int   millis  = 1000;    // n*1000 millisecond = n second --> n minutes = n*60*1000
 
-        timer.schedule(new TimerTask() {
+        timer1.schedule(new TimerTask() {
+        	String timeStamp = null;
                            long time = setTime;
                            public void run() {
                                time = time - millis;
 
-                               String timeStamp = new SimpleDateFormat("mm:ss").format(new Timestamp(time));
+                               timeStamp = new SimpleDateFormat("mm:ss").format(new Timestamp(time));
 
                                label.setText(timeStamp);
+                               
+                              
                            }
                        },
                        millis,
@@ -314,6 +341,14 @@ public class InTest extends JPanel {
 
 	public void setBoxArrayArray(ArrayList<ArrayList> boxArrayArray) {
 		this.boxArrayArray = boxArrayArray;
+	}
+	
+	public static Timer getTimer1() {
+		return timer1;
+	}
+
+	public static void setTimer1(Timer timer1) {
+		InTest.timer1 = timer1;
 	}
 }
 

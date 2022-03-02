@@ -86,11 +86,19 @@ public class DetailedResults extends JPanel {
         exitToMenu = new JButton("Выход\r\n");
         exitToMenu.setFont(new Font("Times New Roman", Font.PLAIN, 15));
         exitToMenu.setBackground(new Color(109, 141, 143));
-        exitToMenu.setBounds(10, 31, 137, 33);
-        add(exitToMenu);
+        exitToMenu.setBounds(10, 31, 200, 40);
+        
     }
 
-    public void addResults() throws SQLException {
+    public JButton getExitToMenu() {
+		return exitToMenu;
+	}
+
+	public void setExitToMenu(JButton exitToMenu) {
+		this.exitToMenu = exitToMenu;
+	}
+
+	public void addResults() throws SQLException {
         readPicture("picture.jpg");
         
     }
@@ -105,6 +113,7 @@ public class DetailedResults extends JPanel {
         dbManager.setConnection();
 
         String            selectSQL = "SELECT image FROM results WHERE date= '" + date + "'";
+        System.out.println(date);
         ResultSet         rs        = null;
         FileOutputStream  fos       = null;
         PreparedStatement pstmt     = null;

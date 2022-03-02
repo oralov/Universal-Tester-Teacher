@@ -5,10 +5,14 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -17,6 +21,7 @@ import java.text.SimpleDateFormat;
 
 import java.util.Date;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -39,7 +44,7 @@ public class Results extends JPanel {
     DetailedResults dtr       = new DetailedResults();
     JPanel          panel_3;
     private JButton backBtn;
-    ResultSet       rs;
+    ResultSet       rs = null;
     String testTitle;
 	String name;
     String dateFrom;
@@ -79,16 +84,46 @@ public class Results extends JPanel {
 
     public void addData(MainWindow window, JPanel prevPanel, DetailedResults nextPanel)
             throws SQLException, ParseException {
+    	nextPanel.getPanel_3().removeAll();
         dbManager.setConnection();
-        
+        if(!name.equals("") && !testTitle.equals("") && !dateFrom.equals("") && !dateTo.equals("")) {
         rs = dbManager.executeQuery("Select * from results where name= '" + name + "' AND testName = '" + testTitle + "'"
         		+ "AND date BETWEEN '" + dateFrom + "' AND '" + dateTo + "'");
-
-        String date1 = rs.getString("date");
-        Date   d     = new SimpleDateFormat("dd.MM.yyyy.hh.mm.ss").parse(date1);
-        String date2 = new SimpleDateFormat("dd.MM.yyyy").format(d);
+        }
+        else if(name.equals("") && testTitle.equals("") && dateFrom.equals("") && dateTo.equals("")) {
+        	rs = dbManager.executeQuery("Select * from results");
+        }
+        else if(name.equals("") && !testTitle.equals("") && !dateFrom.equals("") && !dateTo.equals("")) {
+        	 rs = dbManager.executeQuery("Select * from results where testName = '" + testTitle + "'"
+             		+ "AND date BETWEEN '" + dateFrom + "' AND '" + dateTo + "'");
+        }
+        else if(!name.equals("") && testTitle.equals("") && !dateFrom.equals("") && !dateTo.equals("")) {
+        	rs = dbManager.executeQuery("Select * from results where name= '" + name + "'"
+            		+ "AND date BETWEEN '" + dateFrom + "' AND '" + dateTo + "'");
+        }
+        else if(!name.equals("") && testTitle.equals("") && dateFrom.equals("") && dateTo.equals("")) {
+        	rs = dbManager.executeQuery("Select * from results where name = '" + name + "'" );
+        	
+        	
+        }
+        else if(name.equals("") && !testTitle.equals("") && dateFrom.equals("") && dateTo.equals("") ) {
+        	rs = dbManager.executeQuery("Select * from results where testName = '" + testTitle + "'" );
+        }
+        else if(name.equals("") && testTitle.equals("") && !dateFrom.equals("") && !dateTo.equals("") ) {
+        	rs = dbManager.executeQuery("Select * from results where  date BETWEEN '" + dateFrom + "' AND '" + dateTo + "'");
+        }
+        else if(!name.equals("") && !testTitle.equals("") && dateFrom.equals("") && dateTo.equals("")) {
+        	rs = dbManager.executeQuery("Select * from results where name = '" + name + "' AND testName = '" + testTitle + "'" );
+        	
+        	
+        }
+        
 
         while (rs.next()) {
+        	
+        	String date1 = rs.getString("date");
+            Date   d     = new SimpleDateFormat("dd.MM.yyyy.hh.mm.ss").parse(date1);
+            String date2 = new SimpleDateFormat("dd.MM.yyyy").format(d);
             JPanel panel = new JPanel();
 
             panel.setLayout(new MigLayout());
@@ -114,7 +149,7 @@ public class Results extends JPanel {
             name.setBackground(new Color(48, 155, 169));
             name.setPreferredSize(new Dimension(60, 50));
             panel.setName(rs.getString("date"));
-            System.out.println(panel.getName());
+            
             
             
             results.addActionListener(new ActionListener() {
@@ -122,20 +157,26 @@ public class Results extends JPanel {
                                               public void actionPerformed(ActionEvent e) {
                                               nextPanel.setTestName(results.getText());
                                               nextPanel.setDate(panel.getName());
-                                             
+                                              
 
                                               try {
                                                   nextPanel.addResults();
-                                              } catch (SQLException e1) {
+                                                  
+                                                  prevPanel.setVisible(false);
+                                                  window.add(nextPanel);
+                                                  nextPanel.setVisible(true);
+                                                  
+                                                  
+                                                  display(nextPanel.getPanel_3(), panel);
+                                                  nextPanel.getPanel_3().add(nextPanel.getExitToMenu(), "gapleft 680");
+                                                 // DisplayImage(nextPanel.getPanel_3());
+                                              } catch (SQLException | IOException e1) {
 
                                                   // TODO Auto-generated catch block
                                                   e1.printStackTrace();
                                               }
 
-                                              prevPanel.setVisible(false);
-                                              window.add(nextPanel);
-                                              nextPanel.setVisible(true);
-                                              DisplayImage(nextPanel.getPanel_3(), "picture.jpg");
+                                              
                                           }
                                       });
             date.add(dateLbl);
@@ -199,11 +240,31 @@ public class Results extends JPanel {
 	}
     
     
-    private static void DisplayImage(JPanel jp, String url) {
+    private static void DisplayImage(JPanel jp) {
+    	
 	    JLabel jl=new JLabel();
-	    jl.setIcon(new ImageIcon(url));
+	    jl.setIcon(new ImageIcon("picture.jpg"));
 	    jp.add(jl);
 	}
+    
+    
+    public void display(JPanel panel, JPanel p) throws SQLException, IOException {
+    	panel.removeAll();
+    	dbManager.setConnection();
+    	JLabel lblImage = new JLabel();
+        ResultSet rs2;
+        rs2 = dbManager.executeQuery("SELECT image FROM results WHERE date= '" + p.getName() + "'");
+        InputStream is = rs2.getBinaryStream("image"); 
+     // Decode the inputstream as BufferedImage
+     BufferedImage bufImg = null;
+     bufImg = ImageIO.read(is);
+     Image image = bufImg;
+     ImageIcon icon =new ImageIcon(image);
+     lblImage.setIcon(icon); 
+        panel.add(lblImage);
+    	dbManager.closeConnection();
+    }
+    
 }
 
 

@@ -1,6 +1,7 @@
 package main;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -9,11 +10,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 import Beans.Question;
 import Beans.Test;
@@ -26,6 +31,7 @@ import UI.DetailedResults;
 import UI.EditQuestion;
 import UI.EditTest;
 import UI.FinishTest;
+import UI.FinishWarning;
 import UI.InTest;
 import UI.MainMenu;
 import UI.MainWindow;
@@ -59,6 +65,7 @@ public class FlowManager {
 	String testTitle;
 	String questionTitle;
 	boolean flag = true;
+	boolean flag1 = false;
 	
 	Test test = new Test();
 	Question question;
@@ -66,6 +73,8 @@ public class FlowManager {
 	ArrayList<String> wrongAnswers = new ArrayList<String>();
 	ArrayList<String> correctAnswers = new ArrayList<String>(); 
 	JButton button;
+	FinishWarning finishWarning = new FinishWarning();
+	
 	
 	
 public void run() {
@@ -96,6 +105,10 @@ public void run() {
 		listener(results.getBackBtn(), results, resultsSearch);
 		listener(addQuestions.getNextQuestion(), addQuestions, addQuestions);
 		listener(addQuestions.getBack(), addQuestions, createNewTest);
+		listener(finishWarning.getFinish(), finishTest, finishTest);
+		listener(finishWarning.getBack(), inTest, inTest);
+		
+		
 		
 		
 		
@@ -326,6 +339,8 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 					}
 					
 					else if(prevPanel instanceof CreateTest && nextPanel instanceof CreateNewTest) {
+						createNewTest.getTestName().setText("");
+						createNewTest.getError().setText("");
 						questions = new ArrayList<Question>();
 						
 						prevPanel.setVisible(false); 
@@ -338,7 +353,14 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 					
 					else if(prevPanel instanceof CreateNewTest && nextPanel instanceof AddQuestions) {
 						
-						
+						if(createNewTest.getTestName().getText().equals("")) {
+							
+							createNewTest.getError().setText("Название теста не может Быть пустым!");
+						}
+						else if(!createNewTest.getTestName().equals(null)) {
+							
+							createNewTest.getError().setText("");
+							
 						test.setTestName(createNewTest.getTestName().getText());
 						
 							prevPanel.setVisible(false); 
@@ -347,12 +369,39 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						if(!flag) {
 							questionNum = 1;
 						}
-						
+						}
 					}
 					
 					
 					else if(nextPanel instanceof AddQuestions && prevPanel instanceof AddQuestions) {
 						
+						
+						
+						if(addQuestions.getQuestion().getText().equals("")) {
+							addQuestions.getError().setText("Вопрос не может быть пустым!");	
+						}
+						else if(addQuestions.getAnswer1().getText().equals("")) {
+							addQuestions.getError().setText("Вариант А не может быть пустым!");
+						}
+						else if(addQuestions.getAnswer2().getText().equals("")) {
+							addQuestions.getError().setText("Вариант Б не может быть пустым!");
+						}
+						else if(addQuestions.getAsnwer3().getText().equals("")) {
+							addQuestions.getError().setText("Вариант В не может быть пустым!");
+						}
+						else if(addQuestions.getAnswer4().getText().equals("")) {
+							addQuestions.getError().setText("Вариант Г не может быть пустым!");
+						}
+						else if(addQuestions.getAnswer5().getText().equals("")) {
+							addQuestions.getError().setText("Вариант Д не может быть пустым!");
+						}
+						else if(!addQuestions.getA1().isSelected() && !addQuestions.getA2().isSelected() &&
+								!addQuestions.getA3().isSelected() && !addQuestions.getA4().isSelected() &&
+						!addQuestions.getA5().isSelected()) {
+							addQuestions.getError().setText("Нужен хотя-бы один правильный ответ!");
+						}
+						else {
+							addQuestions.getError().setText("");
 					if(questions.size() == questionNum) {
 						if(flag) {
 						question = new Question();
@@ -392,6 +441,11 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						
 						questions.add(question);
 						clearFields();
+						addQuestions.getA1().setSelected(false);
+						addQuestions.getA2().setSelected(false);
+						addQuestions.getA3().setSelected(false);
+						addQuestions.getA4().setSelected(false);
+						addQuestions.getA5().setSelected(false);
 						questionNum++;
 						
 						
@@ -410,6 +464,7 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						
 						
 					}
+						}
 					 }
 					
 					else if(questionNum >= 1 && nextPanel instanceof CreateNewTest) {
@@ -446,6 +501,8 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 							}
 							addPanel(createTest.getPanel_3(), createTest);
 							dbManager.closeConnection();
+							questions.clear();
+							questionNum = 0;
 							
 							
 						} catch (SQLException e1) {
@@ -460,6 +517,57 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 					}
 					
 					else if(prevPanel instanceof SetTest && nextPanel instanceof InTest ) {
+						
+						Timer timer = new Timer();
+						timer.schedule(new TimerTask() {
+
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								if(inTest.getTimer().getText().equals("00:00")) {
+									System.out.println("Canceling timer");
+									timer.cancel();
+									inTest.getTimer1().cancel();
+									inTest.setVisible(false); 
+									window.add(finishTest);
+									finishTest.setVisible(true);	
+									finishWarning.setVisible(false);
+									try {
+										finishTest.setTestName(testTitle);
+										
+										finishTest.addResults(inTest.getQuestions(), Integer.valueOf(inTest.getQuestionAmount()),
+												inTest.getRgArray(), inTest.getBoxArrayArray());
+								}
+									
+									catch (SQLException e1) {
+										// TODO Auto-generated catch block
+										e1.printStackTrace();
+									}
+								}
+							}
+							
+						}, 0, 1000);
+						
+						
+						if(setTest.getName().equals("")) {
+							setTest.getError().setText("Имя не может быть пустым!");
+						}
+						else if(setTest.getAmountOfQuestions().getText().equals("")) {
+							setTest.getError().setText("Колличество вопросов в тесте не может быть пустым!");
+						}
+						else if(setTest.getAmountOfQuestions().getText().equals("0")) {
+							setTest.getError().setText("Колличество вопросов в теcте не может быть 0");
+						}
+						else if(setTest.getTime().getText().equals("")) {
+							
+							setTest.getError().setText("Время на один вопрос не может быть пустым");
+						}
+                       else if(setTest.getTime().getText().equals("0")) {
+							
+							setTest.getError().setText("Время на один вопрос не может быть 0");
+						}
+						
+						else {
 						inTest.getPanel_3().removeAll();
 						setTest.setVisible(false);
 						window.add(inTest);
@@ -472,54 +580,163 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 							inTest.getTestTitle().setText(testTitle);
 							finishTest.setName(setTest.getName());
 							
+							
+							
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 						setTest.clear();
+						
 						inTest.setVisible(true);
 						
 						
-				      
+						}
 					}
 					else if(prevPanel instanceof Testing && nextPanel instanceof SetTest) {
+						setTest.getError().setText("");
+						
 						prevPanel.setVisible(false); 
 						window.add(nextPanel);
 						nextPanel.setVisible(true);	
 					}
 					else if(prevPanel instanceof InTest && nextPanel instanceof FinishTest ) {
 						
+						
+						ArrayList<JRadioButton> btns = new ArrayList<JRadioButton>();
+						ArrayList<JCheckBox> btns1 = new ArrayList<JCheckBox>();
+						ArrayList<String> unansweredNumbers = new ArrayList<String>();
+						Component[] comp = inTest.getPanel_3().getComponents();	
+						
+						for(Component c: comp) {
+							if(c instanceof JPanel) {
+								Component[] children = ((JPanel)c).getComponents();
+								for(Component field: children) {
+									if(field instanceof JRadioButton) {
+									 
+									 btns.add((JRadioButton)field);
+									
+									}
+									if(field instanceof JCheckBox) {
+										btns1.add((JCheckBox)field);
+									}
+								}
+								if(!btns.isEmpty() &&  !btns.get(0).isSelected() && !btns.get(1).isSelected() 
+										 && !btns.get(2).isSelected() && !btns.get(3).isSelected()
+										 && !btns.get(4).isSelected()) {
+									/*
+									
+									*/
+									
+									unansweredNumbers.add(btns.get(0).getParent().getName());
+									
+								 }
+								else if(!btns1.isEmpty() && !btns1.get(0).isSelected() && !btns1.get(1).isSelected() 
+										 && !btns1.get(2).isSelected() && !btns1.get(3).isSelected()
+										 && !btns1.get(4).isSelected()) {
+									unansweredNumbers.add(btns1.get(0).getParent().getName());
+								}
+								
+								btns.clear();
+								btns1.clear();
+								
+							}
+							
+						}
+						
+						
+						if(!unansweredNumbers.isEmpty()) {
+							String string = "Вы не ответили на вопросы: ";
+							for(int i = 0; i < unansweredNumbers.size(); i++) {
+								if(i < unansweredNumbers.size()- 1) {
+								string = string + unansweredNumbers.get(i) + ", ";
+								}
+								else {
+									string = string + unansweredNumbers.get(i) + ".";
+								}
+							}
+							
+							finishWarning.setVisible(true);
+							finishWarning.getEditableLbl().setText(string);
+							flag1 = true;
+						}
+						
+						if (!flag1) {
 						prevPanel.setVisible(false); 
 						window.add(nextPanel);
 						nextPanel.setVisible(true);	
+						finishWarning.setVisible(false);
 						try {
 							finishTest.setTestName(testTitle);
 							
 							finishTest.addResults(inTest.getQuestions(), Integer.valueOf(inTest.getQuestionAmount()),
 									inTest.getRgArray(), inTest.getBoxArrayArray());
-							//inTest.getQuestions().clear();
+							
+							
 							
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
-						//inTest.printRadio();
+						}	
+					}
+					
+					else if(prevPanel instanceof FinishTest && nextPanel instanceof FinishTest) {
+						inTest.setVisible(false); 
+						window.add(nextPanel);
+						nextPanel.setVisible(true);	
+						finishWarning.setVisible(false);
+						try {
+							finishTest.setTestName(testTitle);
+							
+							finishTest.addResults(inTest.getQuestions(), Integer.valueOf(inTest.getQuestionAmount()),
+									inTest.getRgArray(), inTest.getBoxArrayArray());
+					}
+						
+						catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+					}
+					
+					else if(inTest.getTimer().getText().equals("00:00")) {
+						inTest.getTimer1().cancel();
+						inTest.setVisible(false); 
+						window.add(nextPanel);
+						nextPanel.setVisible(true);	
+						finishWarning.setVisible(false);
+						try {
+							finishTest.setTestName(testTitle);
+							
+							finishTest.addResults(inTest.getQuestions(), Integer.valueOf(inTest.getQuestionAmount()),
+									inTest.getRgArray(), inTest.getBoxArrayArray());
+					}
+						
+						catch (SQLException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
 					}
 					
 					else if(prevPanel instanceof FinishTest && nextPanel instanceof MainMenu) {
 						try {
 							dbManager.setConnection();
 							finishTest.saveResults(dbManager);
+							inTest.getQuestions().clear();
 							dbManager.closeConnection();
 						} catch (SQLException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
+						
+						
+						
 						prevPanel.setVisible(false); 
 						window.add(nextPanel);
 						nextPanel.setVisible(true);	
 					}
 					else if(prevPanel instanceof ResultsSearch && nextPanel instanceof Results) {
+						results.getPanel_3().removeAll();
 						prevPanel.setVisible(false); 
 						window.add(nextPanel);
 						nextPanel.setVisible(true);	
@@ -528,7 +745,9 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						results.setDateFrom(resultsSearch.getFrom().getText());
 						results.setDateTo(resultsSearch.getTo().getText());
 						try {
+							detailedResults.getPanel_3().removeAll();
 							results.addData(window, results, detailedResults);
+							
 						} catch (SQLException e1 ) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -536,6 +755,11 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						catch(ParseException p1) {
 							p1.printStackTrace();
 						}
+					}
+					else if(prevPanel instanceof InTest && nextPanel  instanceof InTest) {
+						flag1 = false;
+						finishWarning.setVisible(false);
+						
 					}
 					
 					

@@ -13,8 +13,11 @@ public class CreateNewTest extends JPanel {
     private JTextField testName;
     JButton            nextBtn;
     JButton            backBtn;
+    JLabel error;
 
-    /**
+   
+
+	/**
      * Create the panel.
      */
     public CreateNewTest() {
@@ -48,6 +51,12 @@ public class CreateNewTest extends JPanel {
         nextBtn.setBackground(new Color(109, 141, 143));
         nextBtn.setBounds(298, 439, 193, 40);
         add(nextBtn);
+        
+        error = new JLabel("");
+        error.setBounds(124, 158, 433, 32);
+        error.setFont(new Font("Times New Roman", Font.PLAIN, 14));
+        error.setForeground(Color.red);
+        add(error);
     }
 
     public JButton getBackBtn() {
@@ -73,6 +82,13 @@ public class CreateNewTest extends JPanel {
     public void setTestName(JTextField testName) {
         this.testName = testName;
     }
+    public JLabel getError() {
+		return error;
+	}
+
+	public void setError(JLabel error) {
+		this.error = error;
+	}
 }
 
 

@@ -25,8 +25,11 @@ public class AddQuestions extends JPanel {
     JCheckBox a3;
     JCheckBox a4;
     JCheckBox a5;
+    private JLabel error;
 
-    /**
+    
+
+	/**
      * Create the panel.
      */
     public AddQuestions() {
@@ -44,12 +47,12 @@ public class AddQuestions extends JPanel {
         JLabel lblNewLabel_1 = new JLabel("\u0412\u043E\u043F\u0440\u043E\u0441:\r\n");
 
         lblNewLabel_1.setFont(new Font("Times New Roman", Font.PLAIN, 20));
-        lblNewLabel_1.setBounds(76, 117, 85, 29);
+        lblNewLabel_1.setBounds(76, 140, 85, 29);
         add(lblNewLabel_1);
         question = new JTextField();
         question.setFont(new Font("Times New Roman", Font.PLAIN, 15));
         question.setColumns(10);
-        question.setBounds(171, 116, 593, 30);
+        question.setBounds(171, 140, 593, 30);
         add(question);
 
         JLabel lblNewLabel_2 =
@@ -64,13 +67,13 @@ public class AddQuestions extends JPanel {
         answer1.setBounds(105, 268, 593, 30);
         add(answer1);
 
-        JLabel lblNewLabel_1_1 = new JLabel("\u0410:\r\n");
+        JLabel lblNewLabel_1_1 = new JLabel("A:\r\n");
 
         lblNewLabel_1_1.setFont(new Font("Times New Roman", Font.PLAIN, 20));
         lblNewLabel_1_1.setBounds(76, 268, 32, 29);
         add(lblNewLabel_1_1);
 
-        JLabel lblNewLabel_1_1_1 = new JLabel("\u0411:");
+        JLabel lblNewLabel_1_1_1 = new JLabel("B:");
 
         lblNewLabel_1_1_1.setFont(new Font("Times New Roman", Font.PLAIN, 20));
         lblNewLabel_1_1_1.setBounds(76, 308, 32, 29);
@@ -81,7 +84,7 @@ public class AddQuestions extends JPanel {
         answer2.setBounds(105, 308, 593, 30);
         add(answer2);
 
-        JLabel lblNewLabel_1_1_1_1 = new JLabel("\u0412:");
+        JLabel lblNewLabel_1_1_1_1 = new JLabel("C:");
 
         lblNewLabel_1_1_1_1.setFont(new Font("Times New Roman", Font.PLAIN, 20));
         lblNewLabel_1_1_1_1.setBounds(76, 347, 32, 29);
@@ -92,7 +95,7 @@ public class AddQuestions extends JPanel {
         asnwer3.setBounds(105, 347, 593, 30);
         add(asnwer3);
 
-        JLabel lblNewLabel_1_1_1_2 = new JLabel("\u0413:");
+        JLabel lblNewLabel_1_1_1_2 = new JLabel("D:");
 
         lblNewLabel_1_1_1_2.setFont(new Font("Times New Roman", Font.PLAIN, 20));
         lblNewLabel_1_1_1_2.setBounds(76, 386, 32, 29);
@@ -103,7 +106,7 @@ public class AddQuestions extends JPanel {
         answer4.setBounds(105, 386, 593, 30);
         add(answer4);
 
-        JLabel lblNewLabel_1_1_1_2_1 = new JLabel("\u0414:");
+        JLabel lblNewLabel_1_1_1_2_1 = new JLabel("E:");
 
         lblNewLabel_1_1_1_2_1.setFont(new Font("Times New Roman", Font.PLAIN, 20));
         lblNewLabel_1_1_1_2_1.setBounds(76, 426, 32, 29);
@@ -145,22 +148,27 @@ public class AddQuestions extends JPanel {
 
         a5.setBounds(735, 432, 21, 21);
         add(a5);
-        back = new JButton("\u041F\u0440\u0435\u0434\u044B\u0434\u0443\u0449\u0438\u0439 \u0432\u043E\u043F\u0440\u043E\u0441");
-        back.setFont(new Font("Times New Roman", Font.PLAIN, 20));
-        back.setBackground(new Color(109, 141, 143));
-        back.setBounds(67, 533, 50, 40);
+        back = new JButton();
+        back.setBackground(new Color(193, 216, 219));
+        back.setIcon(new ImageIcon("icons/arrow.png"));
+        back.setBounds(76, 505, 39, 33);
         add(back);
         saveTest = new JButton("\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0442\u0435\u0441\u0442");
         saveTest.setFont(new Font("Times New Roman", Font.PLAIN, 20));
         saveTest.setBackground(new Color(109, 141, 143));
-        saveTest.setBounds(331, 533, 170, 40);
+        saveTest.setBounds(330, 498, 170, 40);
         add(saveTest);
-        nextQuestion =
-            new JButton("\u0421\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0439 \u0432\u043E\u043F\u0440\u043E\u0441");
-        nextQuestion.setFont(new Font("Times New Roman", Font.PLAIN, 20));
+        nextQuestion = new JButton();
         nextQuestion.setBackground(new Color(109, 141, 143));
-        nextQuestion.setBounds(693, 533, 50, 40);
+        nextQuestion.setIcon(new ImageIcon("icons/arrow-next.png"));
+        nextQuestion.setBounds(693, 505, 39, 33);
         add(nextQuestion);
+        
+        error = new JLabel("");
+        error.setBounds(76, 95, 622, 30);
+        error.setForeground(Color.red);
+        error.setFont(new Font("Times New Roman", Font.PLAIN, 15));
+        add(error);
     }
 
     public JTextField getAnswer1() {
@@ -272,6 +280,13 @@ public class AddQuestions extends JPanel {
 
 	public void setA5(JCheckBox a5) {
 		this.a5 = a5;
+	}
+	public JLabel getError() {
+		return error;
+	}
+
+	public void setError(JLabel error) {
+		this.error = error;
 	}
 }
 
