@@ -22,7 +22,7 @@ public class MainMenu extends JPanel {
         JLabel lblNewLabel = new JLabel("UNIVERSAL TESTER TEACHER");
 
         lblNewLabel.setFont(new Font("Times New Roman", Font.PLAIN, 25));
-        lblNewLabel.setBounds(193, 84, 357, 40);
+        lblNewLabel.setBounds(193, 84, 386, 40);
         add(lblNewLabel);
         createTest = new JButton("\u0421\u043E\u0437\u0434\u0430\u0442\u044C \u0422\u0435\u0441\u0442");
         createTest.setBackground(new Color(109, 141, 143));

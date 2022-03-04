@@ -1,9 +1,11 @@
 package UI;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -12,7 +14,10 @@ import java.awt.ScrollPane;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,6 +38,8 @@ import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -59,6 +66,11 @@ public class DetailedResults extends JPanel {
     private JButton exitToMenu;
     int             grade;
     String          date;
+    JButton saveBtn;
+    private JButton print;
+    ImageIcon save = new ImageIcon("save.png");
+    ImageIcon print1 = new ImageIcon("print.png");
+    
 
     /**
      * Create the panel.
@@ -83,12 +95,56 @@ public class DetailedResults extends JPanel {
         panel_3.setBackground(new Color(193, 216, 219));
         scrollPane.setViewportView(panel_3);
         panel_3.setLayout(new MigLayout("left center, wrap, gapy 5"));
+        
+        saveBtn = new JButton("");
+        saveBtn.setIcon(new ImageIcon(getScaledImage(save.getImage(), 39,33)));
+        saveBtn.setBounds(667, 28, 39, 33);
+        add(saveBtn);
+        
+        print = new JButton("");
+        print.setIcon(new ImageIcon(getScaledImage(print1.getImage(), 39,33)));
+        print.setBounds(716, 28, 39, 33);
+        add(print);
         exitToMenu = new JButton("Выход\r\n");
         exitToMenu.setFont(new Font("Times New Roman", Font.PLAIN, 15));
         exitToMenu.setBackground(new Color(109, 141, 143));
         exitToMenu.setBounds(10, 31, 200, 40);
         
+        saveBtn.addActionListener(new ActionListener()
+			 {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					
+					try {
+						saveOnComputer("picture.jpg");
+					} catch (SQLException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					
+				}
+				
+				
+        
+        
+    });
+        
+        print.addActionListener(new ActionListener()
+		 {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				printComponent(panel_3);
+				
+			}
+			
+			
+   
+   
+});
     }
+    
+    
 
     public JButton getExitToMenu() {
 		return exitToMenu;
@@ -108,6 +164,49 @@ public class DetailedResults extends JPanel {
 
         return grade;
     }
+    
+    public void saveOnComputer(String fileName) throws SQLException {
+    	
+    	JFrame parentFrame = new JFrame();
+    	 
+    	JFileChooser fileChooser = new JFileChooser();
+    	fileChooser.setDialogTitle(fileName);   
+    	 
+    	int userSelection = fileChooser.showSaveDialog(parentFrame);
+    	 
+    	if (userSelection == JFileChooser.APPROVE_OPTION) {
+    	    File fileToSave = fileChooser.getSelectedFile();
+    	    readPicture(fileToSave.getAbsolutePath() + ".jpg");
+    	    System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+    	}
+    	
+    }
+    
+    public static void printComponent(Component component){
+		  PrinterJob pj = PrinterJob.getPrinterJob();
+		  pj.setJobName(" Print Component ");
+
+		  pj.setPrintable (new Printable() {    
+		    public int print(Graphics pg, PageFormat pf, int pageNum){
+		      if (pageNum > 0){
+		      return Printable.NO_SUCH_PAGE;
+		      }
+
+		      Graphics2D g2 = (Graphics2D) pg;
+		      g2.translate(pf.getImageableX(), pf.getImageableY());
+		      component.paint(g2);
+		      return Printable.PAGE_EXISTS;
+		    }
+		  });
+		  if (pj.printDialog() == false)
+		  return;
+
+		  try {
+		        pj.print();
+		  } catch (PrinterException ex) {
+		        // handle exception
+		  }
+		}
 
     public void readPicture(String filename) throws SQLException {
         dbManager.setConnection();
@@ -223,7 +322,7 @@ public class DetailedResults extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				 prevPanel.setVisible(false);
-                 window.add(nextPanel);
+                 window.getContentPane().add(nextPanel);
                  nextPanel.setVisible(true);
 				
 			}

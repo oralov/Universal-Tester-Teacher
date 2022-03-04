@@ -84,8 +84,11 @@ public class Results extends JPanel {
 
     public void addData(MainWindow window, JPanel prevPanel, DetailedResults nextPanel)
             throws SQLException, ParseException {
+    	
+    	
     	nextPanel.getPanel_3().removeAll();
         dbManager.setConnection();
+        
         if(!name.equals("") && !testTitle.equals("") && !dateFrom.equals("") && !dateTo.equals("")) {
         rs = dbManager.executeQuery("Select * from results where name= '" + name + "' AND testName = '" + testTitle + "'"
         		+ "AND date BETWEEN '" + dateFrom + "' AND '" + dateTo + "'");
@@ -110,12 +113,18 @@ public class Results extends JPanel {
         	rs = dbManager.executeQuery("Select * from results where testName = '" + testTitle + "'" );
         }
         else if(name.equals("") && testTitle.equals("") && !dateFrom.equals("") && !dateTo.equals("") ) {
-        	rs = dbManager.executeQuery("Select * from results where  date BETWEEN '" + dateFrom + "' AND '" + dateTo + "'");
+        	
         }
         else if(!name.equals("") && !testTitle.equals("") && dateFrom.equals("") && dateTo.equals("")) {
         	rs = dbManager.executeQuery("Select * from results where name = '" + name + "' AND testName = '" + testTitle + "'" );
         	
         	
+        }
+        
+        if(dateTo.equals(dateFrom)){
+        	System.out.println(dateTo);
+        	System.out.println(dateFrom);
+        	rs = dbManager.executeQuery("Select * from results where  date BETWEEN '" + dateFrom +".00.00" + "' AND '" + dateTo + "12.59" + "'");
         }
         
 

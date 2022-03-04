@@ -74,6 +74,7 @@ public class FlowManager {
 	ArrayList<String> correctAnswers = new ArrayList<String>(); 
 	JButton button;
 	FinishWarning finishWarning = new FinishWarning();
+	Timer timer;
 	
 	
 	
@@ -278,6 +279,9 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 	public void listener(JButton btn, JPanel prevPanel, JPanel nextPanel) {
 		   btn.addActionListener(new ActionListener()
 			 {
+				/**
+				 *
+				 */
 				@Override
 				public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
@@ -518,7 +522,22 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 					
 					else if(prevPanel instanceof SetTest && nextPanel instanceof InTest ) {
 						
-						Timer timer = new Timer();
+						
+						ResultSet count;
+						int q = 0;
+						try {
+							dbManager.setConnection();
+							count = dbManager.executeQuery("SELECT count(*) as count from questions where fk_id = (SELECT id from Test where name ='" + testTitle + "')");
+							System.out.println(testTitle);
+							q = count.getInt("count");
+							dbManager.closeConnection();
+						} catch (SQLException e2) {
+							// TODO Auto-generated catch block
+							e2.printStackTrace();
+						}
+						
+						
+						timer = new Timer();
 						timer.schedule(new TimerTask() {
 
 							@Override
@@ -566,6 +585,12 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 							
 							setTest.getError().setText("Время на один вопрос не может быть 0");
 						}
+                       else if(Integer.parseInt(setTest.getAmountOfQuestions().getText()) > q) {
+                    	   
+                    	   setTest.getError().setText("В тесте нет " + setTest.getAmountOfQuestions().getText() + " вопросов, введите меньшее колличество вопросов." );
+                    	   
+                    	   
+                       }
 						
 						else {
 						inTest.getPanel_3().removeAll();
@@ -601,8 +626,9 @@ public void addPanel(JPanel panel, JPanel panelToAdd) throws SQLException {
 						nextPanel.setVisible(true);	
 					}
 					else if(prevPanel instanceof InTest && nextPanel instanceof FinishTest ) {
-						
-						
+					
+						timer.cancel();
+						inTest.getTimer1().cancel();
 						ArrayList<JRadioButton> btns = new ArrayList<JRadioButton>();
 						ArrayList<JCheckBox> btns1 = new ArrayList<JCheckBox>();
 						ArrayList<String> unansweredNumbers = new ArrayList<String>();

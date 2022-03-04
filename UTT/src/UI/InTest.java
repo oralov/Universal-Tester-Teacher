@@ -68,7 +68,7 @@ public class InTest extends JPanel {
     Question               q;
     FinishTest             finishTest;
     public static Timer timer1;
-
+    JPanel space = new JPanel();
     
 
 	/**
@@ -102,10 +102,22 @@ public class InTest extends JPanel {
         exitTest.setBackground(new Color(109, 141, 143));
         exitTest.setBounds(0,0,20,0);
         
+       
+        space.setBounds(0,0,0,30);
+        space.setBackground(new Color(193, 216, 219));
+        
         
     }
 
-    public void addData(JPanel panel, String test, int questionsAmount) throws SQLException {
+    public String getTestName() {
+		return testName;
+	}
+
+	public void setTestName(String testName) {
+		this.testName = testName;
+	}
+
+	public void addData(JPanel panel, String test, int questionsAmount) throws SQLException {
         dbManager.setConnection();
 
         String query = "SELECT * FROM questions where fk_id = (select id from Test where name ='" + test + "')";
@@ -144,6 +156,7 @@ public class InTest extends JPanel {
 
         dbManager.closeConnection();
         panel.add(exitTest, "gapleft 350");
+        panel.add(space);
        
         
         
@@ -245,13 +258,14 @@ public class InTest extends JPanel {
 
     public static void timer(JLabel label, int time) {
     	timer1   = new Timer();
+    	
     	label.setText("");
         long  setTime = time * 60000;
         
         int   millis  = 1000;    // n*1000 millisecond = n second --> n minutes = n*60*1000
 
         timer1.schedule(new TimerTask() {
-        	String timeStamp = null;
+        	String timeStamp = "00:00";
                            long time = setTime;
                            public void run() {
                                time = time - millis;
